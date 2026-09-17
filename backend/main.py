@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from rules import get_risk
+from gemini_client import generate_explanation
 
 app = FastAPI(title="SafeShare AI")
 
@@ -62,11 +63,22 @@ def _guidance(document_type: str, platform: str, risk_level: str) -> tuple[str, 
 @app.post("/analyze", response_model=AnalyzeResponse)
 def analyze(request: AnalyzeRequest):
     risk = get_risk(request.documentType, request.platform)
+
     explanation, recommendation = _guidance(
         request.documentType,
         request.platform,
         risk["riskLevel"],
     )
+
+    gemini_response = generate_explanation(
+        request.documentType,
+        request.platform,
+        request.purpose,
+        risk["riskLevel"],
+    )
+
+    explanation = gemini_response
+
     return {
         "riskScore": risk["riskScore"],
         "riskLevel": risk["riskLevel"],
