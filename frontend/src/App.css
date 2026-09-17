@@ -1,0 +1,173 @@
+.page {
+  width: min(560px, 100%);
+  margin: 0 auto;
+  padding: 48px 20px 64px;
+}
+
+.header {
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0f766e;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+}
+
+.subtitle {
+  margin: 0;
+  color: #475569;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+form.card {
+  display: grid;
+  gap: 16px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
+
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+select,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+select:focus,
+textarea:focus {
+  outline: 2px solid #14b8a6;
+  outline-offset: 1px;
+  border-color: #14b8a6;
+  background: #fff;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+button {
+  margin-top: 4px;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  background: #0f766e;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: #0d9488;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.error {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.results {
+  margin-top: 20px;
+}
+
+.results h2 {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+  color: #0f172a;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.metrics > div {
+  padding: 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.metrics strong {
+  font-size: 1.25rem;
+  color: #0f172a;
+}
+
+.block p {
+  margin: 0;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.block + .block {
+  margin-top: 14px;
+}
+
+.risk-low .metrics strong,
+.risk-safe .metrics strong {
+  color: #047857;
+}
+
+.risk-medium .metrics strong,
+.risk-moderate .metrics strong {
+  color: #b45309;
+}
+
+.risk-high .metrics strong,
+.risk-critical .metrics strong {
+  color: #b91c1c;
+}
