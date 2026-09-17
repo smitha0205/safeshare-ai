@@ -47,6 +47,7 @@ function App() {
       }
 
       const data = await response.json()
+
       setResult({
         riskScore: data.riskScore,
         riskLevel: data.riskLevel,
@@ -54,48 +55,44 @@ function App() {
         recommendation: data.recommendation,
       })
     } catch (err) {
-      const isNetworkError =
-        err instanceof TypeError ||
-        (err instanceof Error && /failed to fetch|networkerror/i.test(err.message))
-
       setError(
-        isNetworkError
-          ? 'Could not reach the backend. Make sure it is running at http://127.0.0.1:8000.'
-          : err instanceof Error
-            ? err.message
-            : 'Could not check safety. Please try again.',
+        'Could not reach backend. Make sure FastAPI is running on port 8000.'
       )
     } finally {
       setLoading(false)
     }
   }
 
-  const riskClass = result?.riskLevel
-    ? `risk-${String(result.riskLevel).toLowerCase().replace(/\s+/g, '-')}`
-    : ''
-
   return (
     <main className="page">
-      <header className="header">
-        <p className="eyebrow">Document sharing check</p>
-        <h1>SafeShare AI</h1>
-        <p className="subtitle">
-          Check whether sharing a document on a platform is likely to be safe.
+      <div className="hero">
+        <div className="hero-icon">🔍</div>
+
+        <h1 className="hero-title">
+          SafeShare AI
+        </h1>
+
+        <p className="hero-tagline">
+          Think Before You Share
         </p>
-      </header>
+
+        <p className="hero-description">
+          AI-powered document safety analysis for digital platforms
+        </p>
+      </div>
 
       <form className="card" onSubmit={handleSubmit}>
-        <label htmlFor="documentType">
+        <label>
           Document Type
           <select
-            id="documentType"
             value={documentType}
             onChange={(e) => setDocumentType(e.target.value)}
             required
           >
-            <option value="" disabled>
+            <option value="">
               Select a document type
             </option>
+
             {DOCUMENT_TYPES.map((type) => (
               <option key={type} value={type}>
                 {type}
@@ -104,17 +101,17 @@ function App() {
           </select>
         </label>
 
-        <label htmlFor="platform">
+        <label>
           Platform
           <select
-            id="platform"
             value={platform}
             onChange={(e) => setPlatform(e.target.value)}
             required
           >
-            <option value="" disabled>
+            <option value="">
               Select a platform
             </option>
+
             {PLATFORMS.map((item) => (
               <option key={item} value={item}>
                 {item}
@@ -123,10 +120,9 @@ function App() {
           </select>
         </label>
 
-        <label htmlFor="purpose">
+        <label>
           Purpose
           <textarea
-            id="purpose"
             value={purpose}
             onChange={(e) => setPurpose(e.target.value)}
             placeholder="Why are you sharing this document?"
@@ -136,35 +132,70 @@ function App() {
         </label>
 
         <button type="submit" disabled={loading}>
-          {loading ? 'Checking…' : 'Check Safety'}
+          {loading
+            ? '🔍 Analyzing document...'
+            : 'Check Safety'}
         </button>
       </form>
 
-      {error ? <p className="error">{error}</p> : null}
+      {error && (
+        <p className="error">
+          {error}
+        </p>
+      )}
 
-      {result ? (
-        <section className={`card results ${riskClass}`} aria-live="polite">
-          <h2>Safety result</h2>
+      {result && (
+        <section className="card results">
+          <h2>
+            {result.riskLevel === 'Low' && '✅'}
+            {result.riskLevel === 'Medium' && '⚠️'}
+            {result.riskLevel === 'High' && '🚨'}
+            {result.riskLevel === 'Critical' && '⛔'}
+
+            {' '}Safety Analysis
+          </h2>
+
           <div className="metrics">
             <div>
-              <span className="label">Risk Score</span>
-              <strong>{result.riskScore}</strong>
+              <span className="label">
+                Risk Score
+              </span>
+
+              <strong>
+                {result.riskScore}
+              </strong>
             </div>
+
             <div>
-              <span className="label">Risk Level</span>
-              <strong>{result.riskLevel}</strong>
+              <span className="label">
+                Risk Level
+              </span>
+
+              <div
+                className={`risk-badge badge-${result.riskLevel.toLowerCase()}`}
+              >
+                {result.riskLevel}
+              </div>
             </div>
           </div>
+
           <div className="block">
-            <span className="label">Explanation</span>
+            <span className="label">
+              Explanation
+            </span>
+
             <p>{result.explanation}</p>
           </div>
+
           <div className="block">
-            <span className="label">Recommendation</span>
+            <span className="label">
+              Recommendation
+            </span>
+
             <p>{result.recommendation}</p>
           </div>
         </section>
-      ) : null}
+      )}
     </main>
   )
 }
