@@ -14,31 +14,39 @@ if api_key:
 def generate_explanation(document, platform, purpose, risk_level):
     try:
         prompt = f"""
-You are SafeShare AI, a privacy and document-sharing risk advisor.
+You are SafeShare AI.
 
-Document: {document}
+Analyze ONLY this scenario:
+
+Document Type: {document}
 Platform: {platform}
 Purpose: {purpose}
 Risk Level: {risk_level}
 
-The user is deciding whether to share a document on a platform.
+Explain specifically why sharing this document on this platform may be safe or risky.
 
-Explain the privacy and security risks associated with this situation.
+Requirements:
+- Mention the document type naturally.
+- Mention the platform naturally.
+- Consider the user's purpose.
+- Explain why the given risk level makes sense.
+- Use very simple English.
+- Write exactly 4 to 5 short sentences.
+- Keep the explanation practical and user-friendly.
+- Do NOT provide recommendations.
+- Do NOT use headings.
+- Do NOT mention "Explanation" or "Recommendation".
+- Do NOT repeat the risk level directly.
 
-Use simple and easy-to-understand English.
-Write for a college student or general user.
-Use a friendly and informative tone.
-Avoid legal jargon, technical terms, and complex vocabulary.
-Keep sentences short and clear.
-
-Do NOT provide a recommendation.
-Do NOT use headings like "Explanation" or "Recommendation".
-Do NOT repeat the risk level.
-
-Return only a short explanation in 4-5 lines.
+Return only the explanation text.
 """
 
         response = model.generate_content(prompt)
+
+        print("DOCUMENT:", document)
+        print("PLATFORM:", platform)
+        print("PURPOSE:", purpose)
+        print("RESPONSE:", response.text)
 
         return response.text
 
@@ -46,7 +54,8 @@ Return only a short explanation in 4-5 lines.
         print("GEMINI ERROR:", e)
 
         return (
-            "Sharing this document on the selected platform may expose personal information. "
-            "Sensitive details could be stored, accessed, or misused if the platform is not designed "
-            "to handle such documents securely."
+            f"Sharing a {document} on {platform} can expose personal information. "
+            f"The platform may store or process the data you upload. "
+            f"If sensitive details are included, they could be accessed by unauthorized people. "
+            f"It is important to understand how the platform handles your information before sharing it."
         )
