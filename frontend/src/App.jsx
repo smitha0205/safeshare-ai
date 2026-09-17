@@ -47,12 +47,23 @@ function App() {
       }
 
       const data = await response.json()
-      setResult(data)
+      setResult({
+        riskScore: data.riskScore,
+        riskLevel: data.riskLevel,
+        explanation: data.explanation,
+        recommendation: data.recommendation,
+      })
     } catch (err) {
+      const isNetworkError =
+        err instanceof TypeError ||
+        (err instanceof Error && /failed to fetch|networkerror/i.test(err.message))
+
       setError(
-        err instanceof Error
-          ? err.message
-          : 'Could not check safety. Make sure the backend is running.',
+        isNetworkError
+          ? 'Could not reach the backend. Make sure it is running at http://127.0.0.1:8000.'
+          : err instanceof Error
+            ? err.message
+            : 'Could not check safety. Please try again.',
       )
     } finally {
       setLoading(false)
