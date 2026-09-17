@@ -19,18 +19,26 @@ const PLATFORMS = [
   'Social Media',
 ]
 
+const LANGUAGES = [
+  'English',
+  'Hindi',
+  'Telugu',
+]
+
 const API_URL = 'http://127.0.0.1:8000/analyze'
 
 function App() {
   const [documentType, setDocumentType] = useState('')
   const [platform, setPlatform] = useState('')
   const [purpose, setPurpose] = useState('')
+  const [language, setLanguage] = useState('English')
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(event) {
     event.preventDefault()
+
     setError('')
     setResult(null)
     setLoading(true)
@@ -38,8 +46,15 @@ function App() {
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentType, platform, purpose }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentType,
+          platform,
+          purpose,
+          language,
+        }),
       })
 
       if (!response.ok) {
@@ -55,17 +70,32 @@ function App() {
         recommendation: data.recommendation,
       })
     } catch (err) {
+      const isNetworkError =
+        err instanceof TypeError ||
+        (err instanceof Error &&
+          /failed to fetch|networkerror/i.test(err.message))
+
       setError(
-        'Could not reach backend. Make sure FastAPI is running on port 8000.'
+        isNetworkError
+          ? 'Could not reach the backend. Make sure it is running at http://127.0.0.1:8000.'
+          : err instanceof Error
+          ? err.message
+          : 'Could not check safety. Please try again.'
       )
     } finally {
       setLoading(false)
     }
   }
 
+  const riskClass = result?.riskLevel
+    ? `risk-${String(result.riskLevel)
+        .toLowerCase()
+        .replace(/\s+/g, '-')}`
+    : ''
+
   return (
     <main className="page">
-      <div className="hero">
+      <header className="hero">
         <div className="hero-icon">🔍</div>
 
         <h1 className="hero-title">
@@ -77,19 +107,20 @@ function App() {
         </p>
 
         <p className="hero-description">
-          AI-powered document safety analysis for digital platforms
+          Check whether sharing a document on a platform is likely to be safe.
         </p>
-      </div>
+      </header>
 
       <form className="card" onSubmit={handleSubmit}>
-        <label>
+        <label htmlFor="documentType">
           Document Type
           <select
+            id="documentType"
             value={documentType}
             onChange={(e) => setDocumentType(e.target.value)}
             required
           >
-            <option value="">
+            <option value="" disabled>
               Select a document type
             </option>
 
@@ -101,14 +132,15 @@ function App() {
           </select>
         </label>
 
-        <label>
+        <label htmlFor="platform">
           Platform
           <select
+            id="platform"
             value={platform}
             onChange={(e) => setPlatform(e.target.value)}
             required
           >
-            <option value="">
+            <option value="" disabled>
               Select a platform
             </option>
 
@@ -120,9 +152,25 @@ function App() {
           </select>
         </label>
 
-        <label>
+        <label htmlFor="language">
+          Language
+          <select
+            id="language"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+          >
+            {LANGUAGES.map((lang) => (
+              <option key={lang} value={lang}>
+                {lang}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label htmlFor="purpose">
           Purpose
           <textarea
+            id="purpose"
             value={purpose}
             onChange={(e) => setPurpose(e.target.value)}
             placeholder="Why are you sharing this document?"
@@ -132,9 +180,7 @@ function App() {
         </label>
 
         <button type="submit" disabled={loading}>
-          {loading
-            ? '🔍 Analyzing document...'
-            : 'Check Safety'}
+          {loading ? 'Analyzing Document...' : 'Check Safety'}
         </button>
       </form>
 
@@ -145,53 +191,31 @@ function App() {
       )}
 
       {result && (
-        <section className="card results">
-          <h2>
-            {result.riskLevel === 'Low' && '✅'}
-            {result.riskLevel === 'Medium' && '⚠️'}
-            {result.riskLevel === 'High' && '🚨'}
-            {result.riskLevel === 'Critical' && '⛔'}
-
-            {' '}Safety Analysis
-          </h2>
+        <section
+          className={`card results ${riskClass}`}
+          aria-live="polite"
+        >
+          <h2>Safety Result</h2>
 
           <div className="metrics">
             <div>
-              <span className="label">
-                Risk Score
-              </span>
-
-              <strong>
-                {result.riskScore}
-              </strong>
+              <span className="label">Risk Score</span>
+              <strong>{result.riskScore}</strong>
             </div>
 
             <div>
-              <span className="label">
-                Risk Level
-              </span>
-
-              <div
-                className={`risk-badge badge-${result.riskLevel.toLowerCase()}`}
-              >
-                {result.riskLevel}
-              </div>
+              <span className="label">Risk Level</span>
+              <strong>{result.riskLevel}</strong>
             </div>
           </div>
 
           <div className="block">
-            <span className="label">
-              Explanation
-            </span>
-
+            <span className="label">Explanation</span>
             <p>{result.explanation}</p>
           </div>
 
           <div className="block">
-            <span className="label">
-              Recommendation
-            </span>
-
+            <span className="label">Recommendation</span>
             <p>{result.recommendation}</p>
           </div>
         </section>
