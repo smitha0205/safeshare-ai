@@ -1,60 +1,138 @@
-"""Rule-based risk scores for sharing a document on a platform."""
+"""Transparent rule-based risk scoring for document sharing."""
 
-LEVEL_SCORES = {
-    "Low": 20,
-    "Medium": 45,
-    "High": 70,
-    "Critical": 90,
+DOCUMENT_SCORES = {
+    "Aadhaar Card": 40,
+    "PAN Card": 35,
+    "Passport": 40,
+    "Resume": 20,
+    "Medical Report": 35,
+    "Bank Statement": 35,
 }
 
-# Explicit (document type, platform) -> risk level.
-# Combinations not listed fall back to DEFAULT_LEVEL.
-RISK_TABLE = {
-    ("Aadhaar Card", "Government Portal"): "Low",
-    ("Aadhaar Card", "Banking Website"): "Medium",
-    ("Aadhaar Card", "Job Portal"): "High",
-    ("Aadhaar Card", "AI Chatbot"): "Critical",
-    ("Aadhaar Card", "AI Image Generator"): "Critical",
-    ("Aadhaar Card", "Social Media"): "Critical",
-    ("PAN Card", "Government Portal"): "Low",
-    ("PAN Card", "Banking Website"): "Low",
-    ("PAN Card", "Job Portal"): "Medium",
-    ("PAN Card", "AI Chatbot"): "Critical",
-    ("PAN Card", "AI Image Generator"): "Critical",
-    ("PAN Card", "Social Media"): "Critical",
-    ("Passport", "Government Portal"): "Low",
-    ("Passport", "Banking Website"): "Medium",
-    ("Passport", "Job Portal"): "High",
-    ("Passport", "AI Chatbot"): "Critical",
-    ("Passport", "AI Image Generator"): "Critical",
-    ("Passport", "Social Media"): "Critical",
-    ("Resume", "Government Portal"): "Low",
-    ("Resume", "Banking Website"): "Medium",
-    ("Resume", "Job Portal"): "Low",
-    ("Resume", "AI Chatbot"): "High",
-    ("Resume", "AI Image Generator"): "High",
-    ("Resume", "Social Media"): "Medium",
-    ("Medical Report", "Government Portal"): "High",
-    ("Medical Report", "Banking Website"): "High",
-    ("Medical Report", "Job Portal"): "High",
-    ("Medical Report", "AI Chatbot"): "Critical",
-    ("Medical Report", "AI Image Generator"): "Critical",
-    ("Medical Report", "Social Media"): "Critical",
-    ("Bank Statement", "Government Portal"): "Medium",
-    ("Bank Statement", "Banking Website"): "Low",
-    ("Bank Statement", "Job Portal"): "High",
-    ("Bank Statement", "AI Chatbot"): "Critical",
-    ("Bank Statement", "AI Image Generator"): "Critical",
-    ("Bank Statement", "Social Media"): "Critical",
+PLATFORM_SCORES = {
+    "Government Portal": 5,
+    "Banking Website": 10,
+    "Job Portal": 20,
+    "AI Chatbot": 30,
+    "AI Image Generator": 30,
+    "Social Media": 30,
 }
 
-DEFAULT_LEVEL = "High"
+
+def get_purpose_score(purpose: str) -> int:
+    """Calculate risk points based on the sharing purpose."""
+
+    text = purpose.strip().lower()
+
+    # Public sharing has the highest purpose risk.
+    if any(
+        word in text
+        for word in [
+            "public",
+            "post",
+            "social media",
+            "everyone",
+            "publish",
+            "share publicly",
+        ]
+    ):
+        return 30
+
+    # AI-related sharing has higher purpose risk.
+    if any(
+        word in text
+        for word in [
+            "ai",
+            "chatbot",
+            "image",
+            "generate",
+            "analysis",
+            "analyze",
+        ]
+    ):
+        return 20
+
+    # Job-related sharing.
+    if any(
+        word in text
+        for word in [
+            "job",
+            "employment",
+            "recruit",
+            "resume",
+            "career",
+        ]
+    ):
+        return 15
+
+    # Banking-related sharing.
+    if any(
+        word in text
+        for word in [
+            "bank",
+            "payment",
+            "loan",
+            "account",
+        ]
+    ):
+        return 10
+
+    # Government or verification purposes.
+    if any(
+        word in text
+        for word in [
+            "government",
+            "official",
+            "verification",
+            "verify",
+        ]
+    ):
+        return 5
+
+    # General sharing purpose.
+    return 20
 
 
-def get_risk(document_type: str, platform: str) -> dict:
-    """Return riskScore and riskLevel for a document/platform pair."""
-    level = RISK_TABLE.get((document_type.strip(), platform.strip()), DEFAULT_LEVEL)
+def get_risk(
+    document_type: str,
+    platform: str,
+    purpose: str,
+) -> dict:
+    """Return transparent score breakdown and overall risk level."""
+
+    document_score = DOCUMENT_SCORES.get(
+        document_type.strip(),
+        30,
+    )
+
+    platform_score = PLATFORM_SCORES.get(
+        platform.strip(),
+        20,
+    )
+
+    purpose_score = get_purpose_score(purpose)
+
+    risk_score = (
+        document_score
+        + platform_score
+        + purpose_score
+    )
+
+    if risk_score <= 30:
+        risk_level = "Low"
+    elif risk_score <= 55:
+        risk_level = "Medium"
+    elif risk_score <= 75:
+        risk_level = "High"
+    else:
+        risk_level = "Critical"
+
     return {
-        "riskScore": LEVEL_SCORES[level],
-        "riskLevel": level,
+        "riskScore": risk_score,
+        "riskLevel": risk_level,
+        "breakdown": {
+            "documentSensitivity": document_score,
+            "platformRisk": platform_score,
+            "purposeRisk": purpose_score,
+        },
     }
