@@ -66,6 +66,7 @@ function App() {
       setResult({
         riskScore: data.riskScore,
         riskLevel: data.riskLevel,
+        breakdown: data.breakdown,
         explanation: data.explanation,
         recommendation: data.recommendation,
       })
@@ -79,8 +80,8 @@ function App() {
         isNetworkError
           ? 'Could not reach the backend. Make sure it is running at http://127.0.0.1:8000.'
           : err instanceof Error
-          ? err.message
-          : 'Could not check safety. Please try again.'
+            ? err.message
+            : 'Could not check safety. Please try again.'
       )
     } finally {
       setLoading(false)
@@ -200,12 +201,78 @@ function App() {
           <div className="metrics">
             <div>
               <span className="label">Risk Score</span>
-              <strong>{result.riskScore}</strong>
+              <strong>{result.riskScore}/100</strong>
             </div>
 
             <div>
               <span className="label">Risk Level</span>
               <strong>{result.riskLevel}</strong>
+            </div>
+          </div>
+
+          <div className="block breakdown">
+            <span className="label">📊 Clear Score Breakdown</span>
+
+            <div className="breakdown-item">
+              <div>
+                <span>Document Sensitivity</span>
+                <strong>
+                  {result.breakdown.documentSensitivity}/40
+                </strong>
+              </div>
+
+              <div className="breakdown-bar">
+                <div
+                  style={{
+                    width: `${
+                      (result.breakdown.documentSensitivity / 40) * 100
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="breakdown-item">
+              <div>
+                <span>Platform Risk</span>
+                <strong>
+                  {result.breakdown.platformRisk}/30
+                </strong>
+              </div>
+
+              <div className="breakdown-bar">
+                <div
+                  style={{
+                    width: `${
+                      (result.breakdown.platformRisk / 30) * 100
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="breakdown-item">
+              <div>
+                <span>Purpose Risk</span>
+                <strong>
+                  {result.breakdown.purposeRisk}/30
+                </strong>
+              </div>
+
+              <div className="breakdown-bar">
+                <div
+                  style={{
+                    width: `${
+                      (result.breakdown.purposeRisk / 30) * 100
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="breakdown-total">
+              <span>Total</span>
+              <strong>{result.riskScore}/100</strong>
             </div>
           </div>
 
